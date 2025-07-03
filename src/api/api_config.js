@@ -19,7 +19,6 @@ export const signUpUser = async (formData) => {
 };
 
 
-
 export const signInUser = async (formData) => {
   try {
     const res = await fetch('http://localhost:5000/api/auth/signin', {
@@ -34,8 +33,36 @@ export const signInUser = async (formData) => {
       throw new Error(data.message || 'Login failed');
     }
 
-    return data;
+    return {
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      user: data.user,
+    };
   } catch (error) {
     throw error;
+  }
+};
+
+
+export const fetchAllUsers = async () => {
+  const accessToken = localStorage.getItem('accessToken');
+
+  try {
+    const response = await fetch('http://localhost:5000/api/dashboard', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to fetch users');
+    }
+
+    const users = await response.json();
+    return users;
+  } catch (error) {
+    throw new Error(error.message);
   }
 };

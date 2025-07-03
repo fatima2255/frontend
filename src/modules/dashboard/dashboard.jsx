@@ -21,7 +21,7 @@ const Dashboard = () => {
       } catch (err) {
         setError(err.message);
         if (err.message.toLowerCase().includes('jwt')) {
-          navigate('/signin'); 
+          navigate('/signin');
         }
       }
     };
@@ -29,9 +29,27 @@ const Dashboard = () => {
     loadUsers();
   }, [navigate]);
 
+  // signout functionality
+
+  const handleSignOut = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken'); // optional
+    localStorage.removeItem('user'); // optional
+    navigate('/signin');
+  };
+
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">All Users</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">All Users</h2>
+        <button
+          onClick={handleSignOut}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          Sign Out
+        </button>
+      </div>
+
       {error && <p className="text-red-500">{error}</p>}
 
       <ul className="space-y-2">

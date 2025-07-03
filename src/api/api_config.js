@@ -31,7 +31,8 @@ export const fetchAllUsers = async () => {
   const accessToken = localStorage.getItem('accessToken');
 
   try{
-    const res = await axios.get(`${API_URL}/dashboard`, {
+    const res = await axios.get(`${API_URL}/getAllUsers`, {
+
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SignUp from '../src/modules/auth/pages/signup';
 import SignIn from '../src/modules/auth/pages/signin';
-import Dashboard from './modules/auth/pages/dashboard/dashboard';
+import Dashboard from './modules/dashboard/dashboard';
 // import Navbar from './components/Navbar';
 // import Footer from './components/Footer';
 

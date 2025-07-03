@@ -1,45 +1,28 @@
+import axios from "axios";
+const API_URL = import.meta.env.VITE_API_URL;
+
+
 export const signUpUser = async (formData) => {
   try {
-    const res = await fetch('http://localhost:5000/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.message || 'Signup failed');
-    }
-
-    return data;
+    console.log(API_URL);
+    const res = await axios.post(`${API_URL}/auth/signup`, formData);
+    return res.data;
   } catch (error) {
-    throw error;
+    throw new Error(error.response?.data?.message || 'Signup failed');
   }
 };
 
 
+
 export const signInUser = async (formData) => {
   try {
-    const res = await fetch('http://localhost:5000/api/auth/signin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
+    const res = await axios.post(`${API_URL}/auth/signin`, formData);
 
-    const data = await res.json();
+    const { accessToken, refreshToken, user } = res.data;
 
-    if (!res.ok) {
-      throw new Error(data.message || 'Login failed');
-    }
-
-    return {
-      accessToken: data.accessToken,
-      refreshToken: data.refreshToken,
-      user: data.user,
-    };
+    return { accessToken, refreshToken, user };
   } catch (error) {
-    throw error;
+    throw new Error(error.response?.data?.message || 'Login failed');
   }
 };
 
@@ -47,22 +30,16 @@ export const signInUser = async (formData) => {
 export const fetchAllUsers = async () => {
   const accessToken = localStorage.getItem('accessToken');
 
-  try {
-    const response = await fetch('http://localhost:5000/api/dashboard', {
-      method: 'GET',
+  try{
+    const res = await axios.get(`${API_URL}/dashboard`, {
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to fetch users');
-    }
-
-    const users = await response.json();
-    return users;
-  } catch (error) {
-    throw new Error(error.message);
+    return res.data;
+  }
+  catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch users');
   }
 };

@@ -1,6 +1,7 @@
 import { signInUser } from '../../../api/api_config';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom'; // Added Link import
+import { jwtDecode } from 'jwt-decode';
 
 const SignIn = () => {
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -15,10 +16,15 @@ const SignIn = () => {
     try {
       const data = await signInUser(formData);
 
+      console.log('Returned login data:', data);
+
       // Store tokens and username in localStorage
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('username', formData.username);
+
+      const decoded = jwtDecode(data.accessToken);
+      localStorage.setItem('role', decoded.role);
 
       // Navigate to dashboard
       navigate('/dashboard');

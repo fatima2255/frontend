@@ -11,6 +11,7 @@ const SignUp = () => {
     email: '',
     username: '',
     password: '',
+    role: 'user', // keeping it user by default
   });
 
   const [loading, setLoading] = useState(false);
@@ -28,7 +29,7 @@ const SignUp = () => {
 
     try {
       await signUpUser(formData);
-      setFormData({ firstName: '', lastName: '', email: '', username: '', password: '' });
+      setFormData({ firstName: '', lastName: '', email: '', username: '', password: '' , role: 'user' }); // Reset form data
       navigate('/signin');
     } catch (error) {
       setErrorMsg(error.message || 'Server error during signup.');
@@ -102,6 +103,22 @@ const SignUp = () => {
               placeholder="Choose a username"
             />
           </div>
+
+          <div>
+            <label className="block text-gray-700 text-sm font-medium mb-1">Role</label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+              <option value="client">Client</option>
+            </select>
+          </div>
+
 
           <div>
             <label className="block text-gray-700 text-sm font-medium mb-1">Password</label>

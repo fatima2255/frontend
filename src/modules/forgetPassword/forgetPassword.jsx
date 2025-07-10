@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import { sendResetLink } from '../../api/api_config';
 
 function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -11,8 +11,8 @@ function ForgotPassword() {
     setMsg('');
     setError('');
     try {
-      const res = await axios.post('http://localhost:5000/api/forgot-password', { email });
-      setMsg(res.data.message);
+      const data = await sendResetLink(email);
+      setMsg(data.message);
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong');
     }

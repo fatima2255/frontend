@@ -108,3 +108,23 @@ export const updateProduct = async (productId, updatedData) => {
     throw new Error(error.response?.data?.message || 'Failed to update product');
   }
 };
+
+
+//reset functionality
+export const sendResetLink = async (email) => {
+  try {
+    const res = await axios.post(`${API_URL}/forgot-password`, { email });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to send reset link');
+  }
+};
+
+export const resetPassword = async (token, password) => {
+  try {
+    const res = await axios.post(`${API_URL}/reset-password/${token}`, { password });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to reset password');
+  }
+};

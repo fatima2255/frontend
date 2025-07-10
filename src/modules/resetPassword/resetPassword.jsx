@@ -14,16 +14,14 @@ function ResetPassword() {
     setMsg('');
     setError('');
     try {
-      const res = await axios.post(`http://localhost:5000/api/reset-password/${token}`, { password });
-      setMsg(res.data.message);
+      const data = await resetPassword(token, password);
+      setMsg(data.message);
 
-      // Redirect after 2 seconds
       setTimeout(() => {
-        navigate('/signin'); // adjust path as needed
-      }, 2000);
-
+        navigate('/signin');
+      }, 1000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong');
+      setError(err.message);
     }
   };
 

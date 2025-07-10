@@ -83,7 +83,11 @@ const SignIn = () => {
         </div>
 
         <div className="mt-2 text-center text-gray-500 text-xs hover:underline cursor-pointer">
-          Forgot password?
+          <p style={{ marginTop: '10px' }}>
+            <Link to="/forget-password" style={{ color: 'blue', textDecoration: 'underline' }}>
+              Forgot Password?
+            </Link>
+          </p>
         </div>
       </div>
     </div>

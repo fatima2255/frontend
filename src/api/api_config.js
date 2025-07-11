@@ -128,3 +128,54 @@ export const resetPassword = async (token, password) => {
     throw new Error(error.response?.data?.message || 'Failed to reset password');
   }
 };
+
+
+// =================== Cart & Checkout ===================
+
+export const addToCart = async (userId , productId, quantity) => {
+  const token = localStorage.getItem('accessToken');
+  try {
+    const res = await axios.post(`${API_URL}/cart/add`, { userId, productId, quantity }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to add to cart');
+  }
+};
+
+
+export const getCart = async (token) => {
+  const response = await axios.get(`${API_URL}/cart/checkout`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data.cart;
+};
+
+export const updateCartItem = async (token, productId, quantity) => {
+  const response = await axios.put(`${API_URL}/cart/update`, { productId, quantity }, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
+export const removeCartItem = async (token, productId) => {
+  const response = await axios.delete(`${API_URL}/cart/remove/${productId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
+export const createStripeSession = async (token) =>
+  (await axios.post(`${API_URL}/cart/create-checkout-session`, {}, {
+    headers: { Authorization: `Bearer ${token}` },
+  })).data;
+
+export const markCartPaid = async (token) =>
+  (await axios.post(`${API_URL}/cart/mark-paid`, {}, {
+    headers: { Authorization: `Bearer ${token}` },
+  })).data;

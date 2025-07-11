@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { fetchAllProducts } from '../../api/api_config'; 
-import { addProduct,deleteProduct, updateProduct } from '../../api/api_config'; 
+import { fetchAllProducts } from '../../api/api_config';
+import { addProduct, deleteProduct, updateProduct } from '../../api/api_config';
 import { useNavigate } from 'react-router-dom';
+import { addToCart } from '../../api/api_config';
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -20,6 +21,7 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
   const role = localStorage.getItem('role');
+  const userId = localStorage.getItem('userId');
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -129,6 +131,37 @@ const Dashboard = () => {
                 🗑️
               </button>
             )}
+
+            {role === 'user' && (
+              <div className="mt-2">
+                <input
+                  type="number"
+                  min="1"
+                  max={product.stockQuantity}
+                  defaultValue={1}
+                  className="w-16 border px-1 py-0.5 rounded mr-2"
+                  onChange={(e) => product.quantity = e.target.value}
+                />
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    const qty = product.quantity ? parseInt(product.quantity) : 1;
+
+                    try {
+                      await addToCart(userId, product._id, qty);
+                      alert('Added to cart');
+                    } catch (err) {
+                      console.error('Error adding to cart:', err.message);
+                      alert('Failed to add to cart: ' + err.message);
+                    }
+                  }}
+                  className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                  Add to Cart
+                </button>
+              </div>
+            )}
+
           </li>
         ))}
 
@@ -199,7 +232,7 @@ const Dashboard = () => {
                 onClick={handleAddProduct}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
-                Add
+                Add 
               </button>
             </div>
           </div>
@@ -241,6 +274,13 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
+        <button
+          onClick={() => navigate('/checkout')}
+          className="fixed bottom-6 left-6 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded shadow-lg"
+        >
+          🧾 Go to Checkout
+        </button>
 
     </div>
   );

@@ -25,6 +25,7 @@ const SignIn = () => {
 
       const decoded = jwtDecode(data.accessToken);
       localStorage.setItem('role', decoded.role);
+      localStorage.setItem('userId', data.user.id);
 
       // Navigate to dashboard
       navigate('/dashboard');

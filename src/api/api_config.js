@@ -179,3 +179,19 @@ export const markCartPaid = async (token) =>
   (await axios.post(`${API_URL}/cart/mark-paid`, {}, {
     headers: { Authorization: `Bearer ${token}` },
   })).data;
+
+
+  export const fetchPaginatedProducts = async (currentPage) => {
+  const token = localStorage.getItem('accessToken');
+
+  try {
+    const res = await axios.get(`http://localhost:5000/api/products?page=${currentPage}&limit=5`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (err) {
+    throw new Error(err.response?.data?.message || err.message);
+  }
+};

@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
-import { fetchAllProducts } from '../../api/api_config';
-import { addProduct, deleteProduct, updateProduct } from '../../api/api_config';
+import {
+  fetchAllProducts,
+  fetchPaginatedProducts,
+  addProduct,
+  deleteProduct,
+  updateProduct,
+  addToCart,
+} from '../../api/api_config';
 import { useNavigate } from 'react-router-dom';
-import { addToCart } from '../../api/api_config';
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -13,11 +18,12 @@ const Dashboard = () => {
     description: '',
     price: '',
     category: '',
-    stockQuantity: ''
+    stockQuantity: '',
   });
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-
+  const [currentPage, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const navigate = useNavigate();
   const role = localStorage.getItem('role');
@@ -32,8 +38,9 @@ const Dashboard = () => {
       }
 
       try {
-        const data = await fetchAllProducts();
-        setProducts(data);
+        const data = await fetchPaginatedProducts(currentPage);
+        setProducts(data.products || []);
+        setTotalPages(data.totalPages || 1);
       } catch (err) {
         setError(err.message);
         if (err.message.toLowerCase().includes('jwt')) {
@@ -43,9 +50,8 @@ const Dashboard = () => {
     };
 
     loadProducts();
-  }, [navigate]);
+  }, [navigate, currentPage]);
 
-  //signout function
   const handleSignOut = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
@@ -57,14 +63,13 @@ const Dashboard = () => {
     setNewProduct({ ...newProduct, [e.target.name]: e.target.value });
   };
 
-  //product functions 
   const handleAddProduct = async () => {
     try {
       await addProduct(newProduct);
       setShowModal(false);
       setNewProduct({ name: '', description: '', price: '', category: '', stockQuantity: '' });
-      const data = await fetchAllProducts();
-      setProducts(data);
+      const data = await fetchPaginatedProducts(currentPage);
+      setProducts(data.products);
     } catch (err) {
       alert(err.message);
     }
@@ -83,11 +88,19 @@ const Dashboard = () => {
     try {
       await updateProduct(selectedProduct._id, selectedProduct);
       setShowUpdateModal(false);
-      const updatedList = await fetchAllProducts();
-      setProducts(updatedList);
+      const data = await fetchPaginatedProducts(currentPage);
+      setProducts(data.products);
     } catch (err) {
       alert(err.message);
     }
+  };
+
+  const handlePrev = () => {
+    if (currentPage > 1) setPage(currentPage - 1);
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) setPage(currentPage + 1);
   };
 
   return (
@@ -151,7 +164,6 @@ const Dashboard = () => {
                       await addToCart(userId, product._id, qty);
                       alert('Added to cart');
                     } catch (err) {
-                      console.error('Error adding to cart:', err.message);
                       alert('Failed to add to cart: ' + err.message);
                     }
                   }}
@@ -161,11 +173,44 @@ const Dashboard = () => {
                 </button>
               </div>
             )}
-
           </li>
         ))}
-
       </ul>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center gap-4 mt-6">
+        <button
+          onClick={handlePrev}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <p>Page {currentPage} of {totalPages}</p>
+        <button
+          onClick={handleNext}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div><div className="flex justify-between items-center gap-4 mt-6">
+        <button
+          onClick={handlePrev}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+
+        <button
+          onClick={handleNext}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
 
       {/* ➕ Add Product Button */}
       {['admin', 'client'].includes(role) && (
@@ -183,44 +228,17 @@ const Dashboard = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg w-96">
             <h3 className="text-xl font-bold mb-4">Add New Product</h3>
-            <input
-              name="name"
-              placeholder="Name"
-              value={newProduct.name}
-              onChange={handleInputChange}
-              className="w-full mb-2 p-2 border rounded"
-            />
-            <input
-              name="description"
-              placeholder="Description"
-              value={newProduct.description}
-              onChange={handleInputChange}
-              className="w-full mb-2 p-2 border rounded"
-            />
-            <input
-              name="price"
-              type="number"
-              placeholder="Price"
-              value={newProduct.price}
-              onChange={handleInputChange}
-              className="w-full mb-2 p-2 border rounded"
-            />
-            <input
-              name="category"
-              placeholder="Category"
-              value={newProduct.category}
-              onChange={handleInputChange}
-              className="w-full mb-2 p-2 border rounded"
-            />
-            <input
-              name="stockQuantity"
-              type="number"
-              placeholder="Stock Quantity"
-              value={newProduct.stockQuantity}
-              onChange={handleInputChange}
-              className="w-full mb-4 p-2 border rounded"
-            />
-
+            {['name', 'description', 'price', 'category', 'stockQuantity'].map((field) => (
+              <input
+                key={field}
+                name={field}
+                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                value={newProduct[field]}
+                onChange={handleInputChange}
+                type={field === 'price' || field === 'stockQuantity' ? 'number' : 'text'}
+                className="w-full mb-2 p-2 border rounded"
+              />
+            ))}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowModal(false)}
@@ -232,41 +250,39 @@ const Dashboard = () => {
                 onClick={handleAddProduct}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
-                Add 
+                Add
               </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* ✏️ Update Product Modal */}
       {showUpdateModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-md w-[90%] md:w-[400px]">
-            <h2 className="text-lg font-semibold mb-4">Update Product</h2>
-
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h3 className="text-xl font-bold mb-4">Update Product</h3>
             {['name', 'description', 'price', 'category', 'stockQuantity'].map((field) => (
               <input
                 key={field}
-                type={field === 'price' || field === 'stockQuantity' ? 'number' : 'text'}
-                value={selectedProduct[field]}
-                onChange={(e) =>
-                  setSelectedProduct({ ...selectedProduct, [field]: e.target.value })
-                }
+                name={field}
                 placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-                className="w-full mb-2 p-2 border border-gray-300 rounded"
+                value={selectedProduct[field]}
+                onChange={(e) => setSelectedProduct({ ...selectedProduct, [field]: e.target.value })}
+                type={field === 'price' || field === 'stockQuantity' ? 'number' : 'text'}
+                className="w-full mb-2 p-2 border rounded"
               />
             ))}
-
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowUpdateModal(false)}
-                className="px-4 py-2 bg-gray-400 text-white rounded"
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdateSubmit}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 Update
               </button>
@@ -275,13 +291,12 @@ const Dashboard = () => {
         </div>
       )}
 
-        <button
-          onClick={() => navigate('/checkout')}
-          className="fixed bottom-6 left-6 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded shadow-lg"
-        >
-          🧾 Go to Checkout
-        </button>
-
+      <button
+        onClick={() => navigate('/checkout')}
+        className="fixed bottom-6 left-6 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded shadow-lg"
+      >
+        🧾 Go to Checkout
+      </button>
     </div>
   );
 };

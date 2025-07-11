@@ -4,8 +4,10 @@ import SignIn from '../src/modules/auth/pages/signin';
 import Dashboard from './modules/dashboard/dashboard';
 import ForgotPassword from './modules/forgetPassword/forgetPassword';
 import ResetPassword from './modules/resetPassword/resetPassword';
-// import Navbar from './components/Navbar';
-// import Footer from './components/Footer';
+import Checkout from './modules/payment/pages/checkout';
+import CheckoutSuccess from './modules/payment/pages/checkoutSession';
+
+
 
 const App = () => {
   return (
@@ -17,6 +19,8 @@ const App = () => {
            <Route path="/dashboard" element={<Dashboard />} />
            <Route path="/forget-password" element={<ForgotPassword />} />
            <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout/success" element={<CheckoutSuccess />} />
         </Routes>
       </div>
     </Router>
